@@ -88,6 +88,23 @@ def add_review(update, context):
     redis_project.set(chosen_city_key, review)
 
 
+def iter_by_chatgpt(update, context):
+    context.bot.send_message(chat_id=update.effective_chat.id, text='Please wait a moment...')
+
+    query = update.callback_query
+    chosen_plan = query.data.split('_')
+    chosen_city = chosen_plan[0]
+
+    prompt = 'You are now a travel planner. Please list out 5 feature spots for a traveller who visting ' + chosen_city
+
+    global chatgpt
+    reply_message = chatgpt.submit(prompt)
+    logging.info("Update: " + str(update))
+    logging.info("context: " + str(context))
+    context.bot.send_message(chat_id=update.effective_chat.id, text=reply_message)
+
+
+
 
 ########################################################################################################
     # To deal with action after all possible options 
@@ -163,6 +180,36 @@ def chosen_option(update, context):
         
         chosen_city = option.split('_')[0]
         context.bot.send_message(chat_id=update.effective_chat.id, text=f'Please write your review starting with /add {chosen_city}')
+
+
+    
+
+    ####################################################################################################
+        # For choosing "Plan a trip"
+    ####################################################################################################
+        
+    elif option == "plan_trip":
+        keyboard = [
+            [
+                InlineKeyboardButton("Tokyo", callback_data="Tokyo_plan"),
+                InlineKeyboardButton("Bangkok", callback_data="Bangkok_plan"),
+                InlineKeyboardButton("Paris", callback_data="Paris_plan"),
+            ]
+        ]
+        reply_plan_trip = InlineKeyboardMarkup(keyboard)
+        context.bot.send_message(chat_id=query.message.chat_id, text="Tell me, which city for your travel plans?", reply_markup=reply_plan_trip)
+
+
+    elif option == "Tokyo_plan":
+        iter_by_chatgpt(update, context)
+
+    
+    elif option == "Bangkok_plan":
+        iter_by_chatgpt(update, context)
+
+    
+    elif option == "Paris_plan":
+        iter_by_chatgpt(update, context)
 
 
 
