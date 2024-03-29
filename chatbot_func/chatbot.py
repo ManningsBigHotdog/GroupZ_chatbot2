@@ -1,6 +1,7 @@
 import os
-import configparser
+from dotenv import load_dotenv
 import logging
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, CallbackQueryHandler
 import psycopg2
@@ -28,23 +29,29 @@ def start(update: Update, context: CallbackContext):
     update.message.reply_text('Hello! Use the button below to trigger a function.', reply_markup=reply_markup)
 
 def main():
-    # Load configuration
-    config = configparser.ConfigParser()
-    config.read('config.ini')
-
+    bot_type = os.getenv('BOT_TYPE')
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                         level=logging.INFO)
+    
+    if bot_type == 'CHATBOT1':
+        access_token = os.getenv('TELEGRAM_BOT_1_ACCESS_TOKEN')
+    elif bot_type == 'CHATBOT2':
+        access_token = os.getenv('TELEGRAM_BOT_2_ACCESS_TOKEN')
+    else:
+        logging.error("BOT_TYPE environment variable is not set correctly. It must be either 'CHATBOT1' or 'CHATBOT2'.")
+        return
 
-    chatbot_env = os.getenv('CHATBOT_ENV', 'TELEGRAM')
-    updater = Updater(token=config[chatbot_env]['ACCESS_TOKEN'], use_context=True)
+    if not access_token:
+        logging.error(f"Access token for {bot_type} is not set. Please check your .env file.")
+        return
+    updater = Updater(token=access_token, use_context=True)
     dispatcher = updater.dispatcher
-    chatgpt = HKBU_ChatGPT(config)
+    chatgpt = HKBU_ChatGPT()
     updater.dispatcher.bot_data['chatgpt'] = chatgpt
-
     # Connect to db
     init_database(dispatcher.bot_data)
 
-    #handlers
+    # Handlers
     chatgpt_handler = MessageHandler(Filters.text & (~Filters.command), equiped_chatgpt)
     dispatcher.add_handler(chatgpt_handler)
     dispatcher.add_handler(CommandHandler('start', start))
@@ -57,7 +64,6 @@ def main():
     updater.start_polling()
     updater.idle()
 
-    # Close the database connection
     if 'db_connection' in dispatcher.bot_data:
         dispatcher.bot_data['db_connection'].close()
 
