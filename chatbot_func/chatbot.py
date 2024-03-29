@@ -7,6 +7,7 @@ import psycopg2
 
 from chatbot_func.actions.post_comment import add_city_command
 
+
 def main():
     # Load configuration
     config = configparser.ConfigParser()

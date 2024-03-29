@@ -7,6 +7,7 @@ import logging
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackContext
 
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 config = configparser.ConfigParser()
@@ -17,6 +18,7 @@ DATABASE_URL = f"postgresql://{config['POSTGRESQL']['USER']}:" \
                f"{config['POSTGRESQL']['HOST']}:" \
                f"{config['POSTGRESQL']['PORT']}/" \
                f"{config['POSTGRESQL']['DBNAME']}"
+
 
 def init_database(context: CallbackContext) -> None:
     connection = psycopg2.connect(DATABASE_URL)
@@ -72,3 +74,5 @@ def add_city_command(update: Update, context: CallbackContext) -> None:
     except Exception as e:
         logging.error(f"An error occurred while adding the city: {e}")
         update.message.reply_text(f"An error occurred while adding the city.")
+
+        
