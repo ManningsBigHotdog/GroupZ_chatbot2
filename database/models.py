@@ -12,3 +12,4 @@ class City(Base):
     score = Column(Integer, nullable=False)
     comment = Column(Text)
     created_at = Column(DateTime, server_default=func.now())
+    user_tg = Column(Text, nullable=True)

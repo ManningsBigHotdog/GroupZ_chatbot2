@@ -1,6 +1,4 @@
 config.ini
 __pycache__/
 *.py[cod]
-*.ini
-__pycache__/
 .env

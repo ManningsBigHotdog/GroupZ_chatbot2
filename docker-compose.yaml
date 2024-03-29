@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    command: /bin/sh -c "echo 'Starting postgresDB' && docker-entrypoint.sh postgres"
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - chatbot_network
+
+  dispatcher:
+    restart: unless-stopped
+    build: .
+    environment:
+      - BOT_TYPE=DISPATCHER
+      - CHATBOT_ENV=${TELEGRAM_DISPATCHER_ACCESS_TOKEN}
+    command: /bin/sh -c "echo 'Starting chatbot dispatcher service' && python app.py"
+    networks:
+      - chatbot_network
+
+  chatbot1:
+    restart: unless-stopped
+    build: .
+    depends_on:
+      - postgres
+    environment:
+      - BOT_TYPE=CHATBOT1
+      - DB_USER=${POSTGRES_USER}
+      - DB_PASS=${POSTGRES_PASSWORD}
+      - DB_NAME=${POSTGRES_DB}
+      - DB_HOST=${POSTGRES_HOST}
+      - DB_PORT=${POSTGRES_PORT}
+      - CHATBOT_ENV=${TELEGRAM_BOT_1_ACCESS_TOKEN}
+    command: /bin/sh -c "echo 'Starting chatbot#1 service' && python app.py"
+    networks:
+      - chatbot_network
+    
+  chatbot2:
+    restart: unless-stopped
+    build: .
+    depends_on:
+      - postgres
+    environment:
+      - BOT_TYPE=CHATBOT2
+      - DB_USER=${POSTGRES_USER}
+      - DB_PASS=${POSTGRES_PASSWORD}
+      - DB_NAME=${POSTGRES_DB}
+      - DB_HOST=${POSTGRES_HOST}
+      - DB_PORT=${POSTGRES_PORT}
+      - CHATBOT_ENV=${TELEGRAM_BOT_2_ACCESS_TOKEN}
+    command: /bin/sh -c "echo 'Starting chatbot#2 service' && python app.py"
+    networks:
+      - chatbot_network
+
+  nginx:
+    image: nginx:latest
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    depends_on:
+      - chatbot1
+      - chatbot2
+    command: /bin/sh -c "echo 'Starting nginx service' && nginx -g 'daemon off;'"
+    networks:
+      - chatbot_network
+
+volumes:
+  pgdata:
+
+networks:
+  chatbot_network:
+    driver: bridge
