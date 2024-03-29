@@ -1,9 +1,9 @@
+
 from dispatcher import main as dispatcher_main
 from chatbot_func.chatbot import main as chatbot1_main
 from chatbot_func.chatbot import main as chatbot2_main
 
 import os
-
 
 if __name__ == '__main__':
     bot_type = os.getenv('BOT_TYPE')
