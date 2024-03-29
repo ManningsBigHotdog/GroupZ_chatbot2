@@ -2,31 +2,38 @@ import os
 from dotenv import load_dotenv
 import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, CallbackQueryHandler
-import psycopg2
-from chatbot_func.actions.chatgpt_func import HKBU_ChatGPT, equiped_chatgpt
-from chatbot_func.actions.get_comments import get_comments, button, init_database
+from chatbot_func.actions.chatgpt_func import HKBU_ChatGPT, equiped_chatgpt, plan_trip
+from chatbot_func.actions.get_comments import get_comments, init_database, handle_navigation
 from chatbot_func.actions.post_comment import add_city_command
+
+#load env file
+load_dotenv()
 
 def button(update: Update, context: CallbackContext):
     query = update.callback_query
-    query.answer()
-    button_data = query.data
-    if button_data == 'show_functions':
-        functions_text = """
-        Here are the functions you can use:
-        /start - Start the bot and show this message.
-        /search - Search for comments.
-        /addcity - Add a new city comment.
-        """
-        context.bot.send_message(chat_id=query.message.chat_id, text=functions_text)
-
-keyboard = [[InlineKeyboardButton("Show Functions", callback_data='show_functions')]]
-reply_markup = InlineKeyboardMarkup(keyboard)
+    logging.info("Button callback query received: %s", query.data)
+    try:
+        query.answer()
+        button_data = query.data
+        if button_data == 'show_functions':
+            functions_text = (
+                "Here are the functions you can use:\n"
+                "- /start - Start the bot and show this message.\n"
+                "- /search - Search for comments.\n"
+                "- /addcity - Add a new city comment.\n"
+                "- /plan_trip- Add your desired city.\n"
+                "- Normal sending message - ChatGPT function"
+            )
+            query.edit_message_text(text=functions_text)
+    except Exception as e:
+        logging.exception("Error in button function: %s", e)
+        query.edit_message_text(text="An error occurred while processing your request.")
 
 def start(update: Update, context: CallbackContext):
-    update.message.reply_text('Hello! Use the button below to trigger a function.', reply_markup=reply_markup)
+    keyboard = [[InlineKeyboardButton("Show Functions", callback_data='show_functions')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    update.message.reply_text('Hello! Please click this button to see what this chatbot can do.', reply_markup=reply_markup)
 
 def main():
     bot_type = os.getenv('BOT_TYPE')
@@ -55,11 +62,12 @@ def main():
     chatgpt_handler = MessageHandler(Filters.text & (~Filters.command), equiped_chatgpt)
     dispatcher.add_handler(chatgpt_handler)
     dispatcher.add_handler(CommandHandler('start', start))
-    dispatcher.add_handler(CallbackQueryHandler(button))
+    dispatcher.add_handler(CallbackQueryHandler(button, pattern='^show_functions$'))
     dispatcher.add_handler(CommandHandler("search", get_comments))
     dispatcher.add_handler(CommandHandler('addcity', add_city_command))
+    dispatcher.add_handler(CallbackQueryHandler(handle_navigation, pattern='^navigate_comments:'))
+    dispatcher.add_handler(CommandHandler("plan_trip", plan_trip))
     
-   
     # Start the bot
     updater.start_polling()
     updater.idle()
