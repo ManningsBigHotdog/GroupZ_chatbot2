@@ -50,7 +50,7 @@ def add_city_command(update: Update, context: CallbackContext) -> None:
     if len(args) < 4:
         update.message.reply_text(
             "Usage: /addcity <user_name>,<city_name>,<score>,<comment>\n\n"
-            "e.g. /addcity your_username,New York,10,Great place!'\n\n (add '@' in your_username if you wish to chat with other users)"
+            "e.g. /addcity your_username, New York, 10, Great place!'\n\n (add '@' in your_username if you wish to chat with other users)"
         )
         return
 
