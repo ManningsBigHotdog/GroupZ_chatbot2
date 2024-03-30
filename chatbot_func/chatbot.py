@@ -19,11 +19,11 @@ def button(update: Update, context: CallbackContext):
         if button_data == 'show_functions':
             functions_text = (
                 "Here are the functions you can use:\n"
-                "- /start - Start the bot and show this message.\n"
-                "- /search - Search for comments.\n"
-                "- /addcity - Add a new city comment.\n"
-                "- /plantrip - Help you to plan a trip of the city your want to go\n"
-                "- Normal texting - ChatGPT function"
+                "- /start : Start the bot and show this message.\n"
+                "- /search : Search for comments.\n"
+                "- /addcity : Add a new city comment.\n"
+                "- /plantrip : Help you to plan a trip of the city your want to go\n"
+                "- Normal texting : ChatGPT function"
             )
             query.edit_message_text(text=functions_text)
     except Exception as e:
