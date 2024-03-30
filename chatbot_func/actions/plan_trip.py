@@ -26,7 +26,7 @@ def plan_trip(update: Update, context: CallbackContext) -> None:
             context.bot.edit_message_text(
                 chat_id=update.effective_chat.id,
                 message_id=processing_message.message_id,
-                text="Usage: /plantrip <City> e.g. /plan_trip Tokyo"
+                text="Usage: /plantrip <City> e.g. /plantrip Tokyo"
             )
             return
 
