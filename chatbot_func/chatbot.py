@@ -22,7 +22,7 @@ def button(update: Update, context: CallbackContext):
                 "- /start - Start the bot and show this message.\n"
                 "- /search - Search for comments.\n"
                 "- /addcity - Add a new city comment.\n"
-                "- /plantrip - Help you to plan a trip of the city your want to go"
+                "- /plantrip - Help you to plan a trip of the city your want to go\n"
                 "- Normal sending message - ChatGPT function"
             )
             query.edit_message_text(text=functions_text)
