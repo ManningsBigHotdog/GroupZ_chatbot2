@@ -37,7 +37,7 @@ def get_comments(update: Update, context: CallbackContext) -> None:
         page = int(page)
         message = query.message
     elif context.args:
-        city_name = context.args[0]
+        city_name = " ".join(context.args)
     if not city_name:
         message.reply_text("Usage: /search <City> e.g. /search Tokyo")
         return
