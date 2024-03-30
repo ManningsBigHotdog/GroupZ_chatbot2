@@ -33,7 +33,7 @@ def add_city(user_tg, city_name, score, comment, connection):
             VALUES (%s, %s, %s, %s);
         """, (user_tg, city_name, score, comment))
         connection.commit()
-        logging.info(f"City {city_name} added by user {user_tg} successfully with score {score}.")
+        logging.info(f"City '{city_name}' added by user {user_tg} successfully with score {score}.")
     except Exception as e:
         connection.rollback()
         logging.error(f"An error occurred while adding the city: {e}")
@@ -42,20 +42,32 @@ def add_city(user_tg, city_name, score, comment, connection):
 
 
 def add_city_command(update: Update, context: CallbackContext) -> None:
+    import re  # Import the 're' module locally within the function
+
     logging.info("add_city_command was called with context args: {}".format(context.args))
 
     args = context.args
     if len(args) < 4:
         update.message.reply_text(
-            "Usage: /addcity <user_name>, <city_name>, <score>, <comment>\n\n"
-            "e.g. /addcity your_username, New York, 10, Great place!'\n\n (add '@' in your_username if you wish to be chat with other users)"
+            "Usage: /addcity <user_name>,<city_name>,<score>,<comment>\n\n"
+            "e.g. /addcity your_username,New York,10,Great place!'\n\n (add '@' in your_username if you wish to chat with other users)"
         )
         return
 
-    user_tg = args[0]
-    city_name = args[1]
-    score_str = args[2]
-    comment = ' '.join(args[3:])
+    input_string = ' '.join(args)
+    tokens = [token.strip() for token in re.split(r',', input_string)]
+
+    if len(tokens) < 4:
+        update.message.reply_text(
+            "Usage: /addcity <user_name>, <city_name>, <score>, <comment>\n\n"
+            "e.g. /addcity your_username, New York, 10, Great place!'\n\n (add '@' in your_username if you wish to chat with other users)"
+        )
+        return
+
+    user_tg = tokens[0]
+    city_name = tokens[1]
+    score_str = tokens[2]
+    comment = ' '.join(tokens[3:])
 
     try:
         score = int(score_str)
@@ -75,3 +87,4 @@ def add_city_command(update: Update, context: CallbackContext) -> None:
     except Exception as e:
         logging.error(f"An error occurred while adding the city: {e}")
         update.message.reply_text("An error occurred while adding the city.")
+
