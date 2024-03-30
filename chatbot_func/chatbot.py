@@ -23,7 +23,7 @@ def button(update: Update, context: CallbackContext):
                 "- /search - Search for comments.\n"
                 "- /addcity - Add a new city comment.\n"
                 "- /plantrip - Help you to plan a trip of the city your want to go\n"
-                "- Normal sending message - ChatGPT function"
+                "- Normal texting - ChatGPT function"
             )
             query.edit_message_text(text=functions_text)
     except Exception as e:
