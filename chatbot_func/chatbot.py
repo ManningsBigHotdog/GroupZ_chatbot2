@@ -3,10 +3,10 @@ from dotenv import load_dotenv
 import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, CallbackQueryHandler
-from chatbot_func.actions.chatgpt_func import HKBU_ChatGPT, equiped_chatgpt, plan_trip
+from chatbot_func.actions.chatgpt_func import ChatGPT, equiped_chatgpt
 from chatbot_func.actions.get_comments import get_comments, init_database, handle_navigation
 from chatbot_func.actions.post_comment import add_city_command
-
+from chatbot_func.actions.plan_trip import plan_trip
 #load env file
 load_dotenv()
 
@@ -19,11 +19,11 @@ def button(update: Update, context: CallbackContext):
         if button_data == 'show_functions':
             functions_text = (
                 "Here are the functions you can use:\n"
-                "- /start - Start the bot and show this message.\n"
-                "- /search - Search for comments.\n"
-                "- /addcity - Add a new city comment.\n"
-                "- /plan_trip- Add your desired city.\n"
-                "- Normal sending message - ChatGPT function"
+                "- /start : Start the bot and show this message.\n"
+                "- /search : Search for comments.\n"
+                "- /addcity : Add a new city comment.\n"
+                "- /plantrip : Help you to plan a trip of the city your want to go\n"
+                "- Normal texting : ChatGPT function"
             )
             query.edit_message_text(text=functions_text)
     except Exception as e:
@@ -53,7 +53,7 @@ def main():
         return
     updater = Updater(token=access_token, use_context=True)
     dispatcher = updater.dispatcher
-    chatgpt = HKBU_ChatGPT()
+    chatgpt = ChatGPT()
     updater.dispatcher.bot_data['chatgpt'] = chatgpt
     # Connect to db
     init_database(dispatcher.bot_data)
@@ -66,7 +66,7 @@ def main():
     dispatcher.add_handler(CommandHandler("search", get_comments))
     dispatcher.add_handler(CommandHandler('addcity', add_city_command))
     dispatcher.add_handler(CallbackQueryHandler(handle_navigation, pattern='^navigate_comments:'))
-    dispatcher.add_handler(CommandHandler("plan_trip", plan_trip))
+    dispatcher.add_handler(CommandHandler("plantrip", plan_trip))
     
     # Start the bot
     updater.start_polling()
